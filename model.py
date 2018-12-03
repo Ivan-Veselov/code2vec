@@ -23,6 +23,7 @@ class Model:
         self.predict_placeholder = None
         self.eval_top_words_op, self.eval_top_values_op, self.eval_original_names_op = None, None, None
         self.predict_top_words_op, self.predict_top_values_op, self.predict_original_names_op = None, None, None
+        self.predict_weighted_average_contexts_op = None
 
         if config.LOAD_PATH:
             self.load_model(sess=None)
@@ -130,7 +131,7 @@ class Model:
                                                                   target_word_to_index=self.target_word_to_index,
                                                                   config=self.config, is_evaluating=True)
             self.eval_placeholder = self.eval_queue.get_input_placeholder()
-            self.eval_top_words_op, self.eval_top_values_op, self.eval_original_names_op, _, _, _, _ = \
+            self.eval_top_words_op, self.eval_top_values_op, self.eval_original_names_op, _, _, _, _, _ = \
                 self.build_test_graph(self.eval_queue.get_filtered_batches())
             self.saver = tf.train.Saver()
 
@@ -352,7 +353,8 @@ class Model:
                                                                      config=self.config, is_evaluating=True)
             self.predict_placeholder = self.predict_queue.get_input_placeholder()
             self.predict_top_words_op, self.predict_top_values_op, self.predict_original_names_op, \
-            self.attention_weights_op, self.predict_source_string, self.predict_path_string, self.predict_path_target_string = \
+            self.attention_weights_op, self.predict_source_string, self.predict_path_string, self.predict_path_target_string, \
+            self.predict_weighted_average_contexts_op = \
                 self.build_test_graph(self.predict_queue.get_filtered_batches(), normalize_scores=True)
 
             self.initialize_session_variables(self.sess)
@@ -364,7 +366,7 @@ class Model:
             top_words, top_scores, original_names, attention_weights, source_strings, path_strings, target_strings, weighted_average_contexts = self.sess.run(
                 [self.predict_top_words_op, self.predict_top_values_op, self.predict_original_names_op,
                  self.attention_weights_op, self.predict_source_string, self.predict_path_string,
-                 self.predict_path_target_string],
+                 self.predict_path_target_string, self.predict_weighted_average_contexts_op],
                 feed_dict={self.predict_placeholder: batch})
             top_words, original_names = common.binary_to_string_matrix(top_words), common.binary_to_string_matrix(
                 original_names)
