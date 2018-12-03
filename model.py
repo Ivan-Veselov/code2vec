@@ -374,7 +374,7 @@ class Model:
             attention_per_path = self.get_attention_per_path(source_strings, path_strings, target_strings,
                                                              attention_weights)
             original_names = [w for l in original_names for w in l]
-            results.append((original_names[0], top_words[0], top_scores[0], attention_per_path, weighted_average_contexts))
+            results.append((original_names[0], top_words[0], top_scores[0], attention_per_path, weighted_average_contexts[0]))
         return results
 
     def get_attention_per_path(self, source_strings, path_strings, target_strings, attention_weights):
