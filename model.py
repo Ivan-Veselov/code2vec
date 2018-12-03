@@ -342,7 +342,7 @@ class Model:
         if normalize_scores:
             top_scores = tf.nn.softmax(top_scores)
 
-        return top_words, top_scores, original_words, attention_weights, source_string, path_string, path_target_string
+        return top_words, top_scores, original_words, attention_weights, source_string, path_string, path_target_string, weighted_average_contexts
 
     def predict(self, predict_data_lines):
         if self.predict_queue is None:
@@ -361,7 +361,7 @@ class Model:
 
         results = []
         for batch in common.split_to_batches(predict_data_lines, 1):
-            top_words, top_scores, original_names, attention_weights, source_strings, path_strings, target_strings = self.sess.run(
+            top_words, top_scores, original_names, attention_weights, source_strings, path_strings, target_strings, weighted_average_contexts = self.sess.run(
                 [self.predict_top_words_op, self.predict_top_values_op, self.predict_original_names_op,
                  self.attention_weights_op, self.predict_source_string, self.predict_path_string,
                  self.predict_path_target_string],
@@ -372,7 +372,7 @@ class Model:
             attention_per_path = self.get_attention_per_path(source_strings, path_strings, target_strings,
                                                              attention_weights)
             original_names = [w for l in original_names for w in l]
-            results.append((original_names[0], top_words[0], top_scores[0], attention_per_path))
+            results.append((original_names[0], top_words[0], top_scores[0], attention_per_path, weighted_average_contexts))
         return results
 
     def get_attention_per_path(self, source_strings, path_strings, target_strings, attention_weights):
